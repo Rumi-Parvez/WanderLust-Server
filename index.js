@@ -1,7 +1,7 @@
 import cors from "cors"
 import express from "express"
 import 'dotenv/config'
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -36,6 +36,13 @@ app.get('/place', async(req,res)=>{
     res.send(result) 
 
 })
+app.get('/place/:id',  async (req,res)=>{
+    const id = req.params.id
+    const filter = {_id: new ObjectId(id)}
+
+    const result = await destination.findOne(filter)
+    res.send(result)
+})
 app.post('/place', async(req, res)=>{
     const data = req.body;
     console.log(data);
@@ -45,6 +52,26 @@ app.post('/place', async(req, res)=>{
 })
 
 
+app.delete('/place/:id',  async(req,res) =>{
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const result = await destination.deleteOne(filter)
+    res.send(result)
+})
+
+
+
+app.patch("/place/:id", async (req, res) => {
+  const  id  = req.params.id;
+  const updatedData = req.body;
+
+  const result = await destination.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updatedData }
+  );
+
+  res.send(result);
+});
 
 app.get('/', (req , res)=>{
     res.send({message: "hello world server"})

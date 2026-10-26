@@ -27,11 +27,18 @@ const mongodb = await connectToMongoDB()
 const db = mongodb.db('WanderLust_DB')
 const user = db.collection('user')
 const destination = db.collection('destinations')
+const booking = db.collection('booking')
 
 
 
 app.get('/place', async(req,res)=>{
     const data = destination.find({})
+    const result = await data.toArray();
+    res.send(result) 
+
+})
+app.get('/bookings', async(req,res)=>{
+    const data = booking.find({})
     const result = await data.toArray();
     res.send(result) 
 
@@ -72,6 +79,49 @@ app.patch("/place/:id", async (req, res) => {
 
   res.send(result);
 });
+
+
+app.post("/bookings", async (req, res) => {
+  try {
+    const bookingData = req.body;
+
+    console.log("Received booking:", bookingData);
+
+    const result = await booking.insertOne(bookingData);
+
+    res.status(201).send({
+      success: true,
+      message: "Booking created successfully!",
+      insertedId: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Booking error:", error);
+
+    res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+app.get("/bookings/:email", async (req, res) => {
+  const email = req.params.email;
+
+  const result = await booking
+    .find({ userEmail: email })
+    .toArray();
+
+  res.send(result);
+});
+
+app.delete('/bookings/:id',  async(req,res) =>{
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const result = await booking.deleteOne(filter)
+    res.send(result)
+})
+
+
 
 app.get('/', (req , res)=>{
     res.send({message: "hello world server"})
